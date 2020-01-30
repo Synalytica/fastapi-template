@@ -6,4 +6,4 @@ from .core import core
 app = FastAPI()
 
 # include various APIs
-app.include_router(core, prefix="/core")
+app.include_router(core, prefix="/core", tags=["core"])
