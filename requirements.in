@@ -5,3 +5,6 @@ email_validator
 python-multipart
 fastapi
 fastapi_contrib[ujson,mongo,pytz]
+
+# specific deps
+python-ldap
