@@ -2,7 +2,7 @@ FROM python:3.7-alpine
 LABEL author=pk13055 version=0.2
 
 RUN pip3 install pip-tools \
- && apk add --update build-base openldap-dev # ldap (opt dep) \ 
+ && apk add --update build-base \ 
  && rm -rf /var/cache/apk/*
 
 WORKDIR /app
