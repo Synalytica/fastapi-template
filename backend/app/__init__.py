@@ -1,7 +1,13 @@
 from fastapi import FastAPI
+from fastapi.openapi.docs import (
+    get_redoc_html,
+    get_swagger_ui_html,
+    get_swagger_ui_oauth2_redirect_html,
+)
 from starlette.exceptions import HTTPException
 from starlette.middleware.cors import CORSMiddleware
 from starlette.status import HTTP_422_UNPROCESSABLE_ENTITY
+from starlette.staticfiles import StaticFiles
 
 from .core import core as core_router
 from app.utils.db_loader import connect_db, disconnect_db
