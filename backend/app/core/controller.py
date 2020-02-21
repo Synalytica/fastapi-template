@@ -2,24 +2,24 @@ from fastapi import APIRouter, Depends
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from app.utils.mongodb import get_database
+from app.models.users import UserInResponse
 
 
 router = APIRouter()
 
 
-@router.get("/", tags=["users"])
-async def get_all_users(db: AsyncIOMotorClient = Depends(get_database)):
+@router.get("/", response_model=UserInResponse, tags=["users"])
+async def get_all_users(db: AsyncIOMotorClient = Depends(get_database)) -> UserInResponse:
     """
     Get a list of users in the database
 
     Each item will have a set of params
-    - **name**: Item name
     """
     users = []
     rows = db["core"]["users"].find()
     async for row in rows:
         users.append(row)
-    return users
+    return UserInResponse(users=users)
 
 
 
