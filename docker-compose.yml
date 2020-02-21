@@ -44,11 +44,10 @@ services:
 
         frontend:
                 build: ./frontend
+                entrypoint: ./entrypoint.sh
                 restart: unless-stopped
                 environment:
                     NODE_ENV: development  # OR [production]
-                entrypoint: npm
-                command: run-script serve
                 volumes:
                         - web-root:/home/app/dist
                         - ./frontend:/home/app/
