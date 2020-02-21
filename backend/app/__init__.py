@@ -16,7 +16,8 @@ from app.utils.error_handlers import http_error_handler, http_422_error_handler
 import config
 
 
-app = FastAPI(openapi_url='/static/openapi.json',
+app = FastAPI(openapi_prefix="/api",
+              openapi_url='/static/openapi.json',
               docs_url=None, redoc_url=None)
 
 # handling static files
