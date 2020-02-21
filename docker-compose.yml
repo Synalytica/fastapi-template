@@ -1,71 +1,85 @@
 version: "3.1"
 services:
-  db:
-    image: mongo
-    restart: always
-    networks:
-      - db_network # for API reqs
-    environment:
-      MONGO_INITDB_ROOT_USERNAME: $DB_USERNAME
-      MONGO_INITDB_ROOT_PASSWORD: $DB_PASSWORD
-      MONGO_INITDB_DATABASE: $MONGO_INITDB_DATABASE
-    volumes:
-      - db_vol:/data/db
+        db:
+                image: mongo
+                restart: always
+                networks:
+                        - db_network # for API reqs
+                environment:
+                        MONGO_INITDB_ROOT_USERNAME: $DB_USERNAME
+                        MONGO_INITDB_ROOT_PASSWORD: $DB_PASSWORD
+                        MONGO_INITDB_DATABASE: $MONGO_INITDB_DATABASE
+                volumes:
+                        - db_vol:/data/db
 
-  db-interface:
-    image: mongo-express
-    restart: always
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: $DB_USERNAME
-      ME_CONFIG_MONGODB_ADMINPASSWORD: $DB_PASSWORD
-      ME_CONFIG_SITE_BASEURL: /db_interface/
-      ME_CONFIG_MONGODB_SERVER: db
-    networks:
-      - db_network # access db
-      - web_network # access the interface
-    depends_on:
-      - db
+        db-interface:
+                image: mongo-express
+                restart: always
+                environment:
+                        ME_CONFIG_MONGODB_ADMINUSERNAME: $DB_USERNAME
+                        ME_CONFIG_MONGODB_ADMINPASSWORD: $DB_PASSWORD
+                        ME_CONFIG_SITE_BASEURL: /db_interface/
+                        ME_CONFIG_MONGODB_SERVER: db
+                networks:
+                        - db_network # access db
+                        - web_network # access the interface
+                depends_on:
+                        - db
 
-  backend:
-    build: ./backend
-    image: pk13055/fastapi-template:mongo
-    restart: always
-    volumes:
-      - ./backend:/app
-      - static_vol:/app/app/static
-      - media_vol:/app/uploads
-    environment:
-      PORT: 8080
-      DEBUG: $DEBUG
-      SECRET_KEY: $SECRET_KEY
-      DATABASE_URL: $DATABASE_URL
-    depends_on:
-      - db
-    networks:
-      - db_network # for data fetching/upload
-      - web_network # for web API
+        backend:
+                build: ./backend
+                restart: always
+                volumes:
+                        - ./backend:/app
+                environment:
+                        PORT: 8080
+                        DEBUG: $DEBUG
+                        SECRET_KEY: $SECRET_KEY
+                        DATABASE_URL: $DATABASE_URL
+                depends_on:
+                        - db
+                networks:
+                        - db_network # for data fetching/upload
+                        - web_network # for web API
 
-  nginx:
-    image: nginx:latest
-    ports:
-      - 8000:80
-    volumes:
-      - ./config/nginx:/etc/nginx/conf.d/
-      - static_vol:/app/app/static
-      - media_vol:/app/uploads
-    depends_on:
-      - backend
-      - db-interface
-    networks:
-      - web_network
+        frontend:
+                build: ./frontend
+                restart: unless-stopped
+                environment:
+                    NODE_ENV: development  # OR [production]
+                entrypoint: npm
+                command: run-script serve
+                volumes:
+                        - web-root:/home/app/dist
+                        - ./frontend:/home/app/
+                        - /home/app/node_modules
+                environment:
+                        PORT: 5000
+                        DEBUG: $DEBUG
+                depends_on:
+                        - backend
+                networks:
+                        - web_network
+
+        nginx:
+                image: nginx:latest
+                ports:
+                        - 8000:80
+                volumes:
+                        - web-root:/var/www/html
+                        - ./config/nginx:/etc/nginx/conf.d/
+                depends_on:
+                        - backend
+                        - db-interface
+                networks:
+                        - web_network
 
 networks:
-  db_network:
-    driver: bridge
-  web_network:
-    driver: bridge
+        web_network:
+            driver: bridge
+        db_network:
+            driver: bridge
 
 volumes:
-  static_vol:
-  media_vol:
-  db_vol:
+        web-root:
+        db_vol:
