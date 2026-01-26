@@ -1,0 +1,12 @@
+[project]
+name = "backend"
+version = "2.0.0"
+description = "Basic FastAPI template"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "email-validator>=2.3.0",
+    "fastapi[standard]>=0.128.0",
+    "motor>=3.7.1",
+    "python-multipart>=0.0.22",
+]

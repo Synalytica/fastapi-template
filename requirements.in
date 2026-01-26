@@ -1,9 +1,0 @@
-# app deps
-uvicorn
-ujson
-email_validator
-python-multipart
-motor
-fastapi
-aiofiles
-fastapi_contrib[ujson,mongo,pytz]
