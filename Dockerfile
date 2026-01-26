@@ -1,17 +1,16 @@
-FROM python:3.7-alpine
-LABEL author=pk13055 version=0.2
-
-RUN pip3 install pip-tools \
- && apk add --update build-base \ 
- && rm -rf /var/cache/apk/*
-
+FROM python:3.12-alpine
+LABEL author=pk13055 version=2.0
+ENV PYTHONUNBUFFERED=1
+COPY --from=ghcr.io/astral-sh/uv:latest /uv /uvx /bin/
 WORKDIR /app
-COPY requirements.in  .
-RUN pip-compile requirements.in > requirements.txt \
- && pip3 install -r requirements.txt
-
-
-COPY . /app
-EXPOSE 8080
-ENTRYPOINT ["uvicorn", "--host", "0.0.0.0", "--port", "8080", "--reload", "main:app"]
-
+ENV UV_COMPILE_BYTECODE=1
+ENV UV_LINK_MODE=copy
+RUN --mount=type=cache,target=/root/.cache/uv \
+    --mount=type=bind,source=uv.lock,target=uv.lock \
+    --mount=type=bind,source=pyproject.toml,target=pyproject.toml \
+    uv sync --frozen --no-install-project --no-dev
+ADD . /app
+RUN --mount=type=cache,target=/root/.cache/uv \
+    uv sync --frozen --no-dev
+ENV PATH="/app/.venv/bin:$PATH"
+ENTRYPOINT ["./entrypoint.sh"]
